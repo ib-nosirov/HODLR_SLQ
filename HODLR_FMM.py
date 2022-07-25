@@ -1,14 +1,19 @@
 import numpy as np
+from numpy import linalg as LA
 import scipy.io
 from scipy.sparse.linalg import LinearOperator
-
-def HODLR_mat_vec_mult(u_tree,z_tree,leaves_cell,idx_tree,b):
+#np.set_printoptions(precision=None)
+def HODLR_matvec(A,b):
 	# ARGS:
 	#	u_tree: 3d array containing u matrices.
 	#	z_tree: 3d array containing z matrices.
 	#	A_diags: main block-diagonal entries. 
 	#	it_arr: breadth-first iterator array containing nodes.
 	# *Note: the first node in each tree has been removed while processing.
+	u_tree = A[0]
+	z_tree = A[1]
+	leaves_cell = A[2]
+	idx_tree = A[3]
 
 	# determine the number of nodes.
 	num_nodes = idx_tree.shape[1]
@@ -21,7 +26,6 @@ def HODLR_mat_vec_mult(u_tree,z_tree,leaves_cell,idx_tree,b):
 	offset = 0
 	for i_layer in range(len(layers_arr)-1):
 		# We will populate this matrix by stacking matrix multiplies.
-		y_tmp = np.empty(output_length)
 		for j_node in get_nodes(i_layer,layers_arr,num_nodes):
 			offset = j_node
 			start = idx_tree[0,j_node][0,0]-1
@@ -34,17 +38,13 @@ def HODLR_mat_vec_mult(u_tree,z_tree,leaves_cell,idx_tree,b):
 				z = z_tree[0,j_node-1]
 		# Stack the computed vectors at the current layer into one nxk vector.
 			z_b = z.T.dot(b[start:finish])
-			y_tmp[start:finish] = u.dot(z_b)
-		# Add this vector to y.
-		y += y_tmp
+			y[start:finish] += u.dot(z_b)
 	# add the leaves	
-	y_tmp = np.empty(output_length)
 	for i_node in range(len(leaves_cell[0])):
 		start = idx_tree[0,i_node+offset][0,0]-1
 		finish = idx_tree[0,i_node+offset][0,1]
 		diag_block = leaves_cell[0,i_node]
-		y_tmp[start:finish] = diag_block.dot(b[start:finish])
-	y += y_tmp
+		y[start:finish] += diag_block.dot(b[start:finish])
 	return y
 
 def get_layers(num_nodes):
@@ -66,11 +66,3 @@ def get_nodes(layer,layers_arr,num_nodes):
 		nodes_arr = np.arange(layers_arr[layer],num_nodes)
 	return nodes_arr
  
-HODLR_mtrx = scipy.io.loadmat('HODLR_mtrx.mat')
-u_tree = HODLR_mtrx['u_tree']
-z_tree = HODLR_mtrx['z_tree']
-leaves_cell = HODLR_mtrx['leaves_cell']
-idx_tree = HODLR_mtrx['idx_tree']
-b = np.ones(2*u_tree[0,1].shape[0])
-y = HODLR_mat_vec_mult(u_tree,z_tree,leaves_cell,idx_tree,b)
-print(y)
