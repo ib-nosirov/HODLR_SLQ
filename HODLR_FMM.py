@@ -1,8 +1,6 @@
 import numpy as np
 from numpy import linalg as LA
 import scipy.io
-from scipy.sparse.linalg import LinearOperator
-#np.set_printoptions(precision=None)
 def HODLR_matvec(A,b):
 	# ARGS:
 	#	u_tree: 3d array containing u matrices.
@@ -19,7 +17,7 @@ def HODLR_matvec(A,b):
 	num_nodes = idx_tree.shape[1]
 	# create a placeholder nxk vector; call it 'y'.
 	output_length = 2*u_tree[0,1].shape[0]
-	y = np.empty(output_length)
+	y = np.zeros(output_length)
 	# for each layer: compute u_i (z_i* b_i) where * is the conjugate
 	# transpose.
 	layers_arr = get_layers(num_nodes)
