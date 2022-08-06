@@ -7,6 +7,7 @@ def Lanczos(A,w,m):
         m = n
     v = A@w
     T = np.zeros((m,m))
+    V = np.zeros((m,m))
     q0 = np.zeros(n)
     beta = LA.norm(v)
     for i in range(m-1):
@@ -20,13 +21,16 @@ def Lanczos(A,w,m):
         T[i,i] = alpha
         T[i+1,i] = beta
         T[i,i+1] = beta
+        V[i] = v
     t = w
     w = v/beta
     v = -beta*t
     v += A@w 
     alpha = np.dot(w.T,v)
     v -= alpha*w
+    V[-1] = v
     T[m-1,m-1] = alpha
+    print('isV_Orthonormal', V@V.T)
     return T
 
 rng = np.random.default_rng(0)
