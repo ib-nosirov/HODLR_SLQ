@@ -22,21 +22,22 @@ def HODLR_matvec(A,b):
 	# transpose.
 	layers_arr = get_layers(num_nodes)
 	offset = 0
-	for i_layer in range(len(layers_arr)-1):
+#	for i_layer in range(len(layers_arr)-1):
 		# We will populate this matrix by stacking matrix multiplies.
-		for j_node in get_nodes(i_layer,layers_arr,num_nodes):
-			offset = j_node
-			start = idx_tree[0,j_node][0,0]-1
-			finish = idx_tree[0,j_node][0,1]
-			if j_node%2 == 0:
-				u = u_tree[0,j_node]
-				z = z_tree[0,j_node+1]
-			else:
-				u = u_tree[0,j_node]
-				z = z_tree[0,j_node-1]
-		# Stack the computed vectors at the current layer into one nxk vector.
-			z_b = z.T.dot(b[start:finish])
-			y[start:finish] += u.dot(z_b)
+	for j_node in range(num_nodes-8):
+		offset = j_node
+		start = idx_tree[0,j_node][0,0]-1
+		finish = idx_tree[0,j_node][0,1]
+		print('start',start,'finish',finish,'j_node',j_node)
+		if j_node%2 == 0:
+			u = u_tree[0,j_node]
+			z = z_tree[0,j_node+1]
+		else:
+			u = u_tree[0,j_node]
+			z = z_tree[0,j_node-1]
+	# Stack the computed vectors at the current layer into one nxk vector.
+		z_b = z.T.dot(b[start:finish])
+		y[start:finish] += u.dot(z_b)
 	# add the leaves	
 	for i_node in range(len(leaves_cell[0])):
 		start = idx_tree[0,i_node+offset][0,0]-1

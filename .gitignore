@@ -1,3 +1,7 @@
 *.mat
 __pycache__
 *.txt
+bin/
+lib/
+lib64
+pyvenv.cfg
